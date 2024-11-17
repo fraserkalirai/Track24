@@ -1,0 +1,346 @@
+<header>
+  <nav class="flex h-14 px-4 bg-track24-primary-400 w-full items-center justify-between">
+    <div class="flex items-center font-Indivisible font-semibold text-base text-track24-highlight gap-8">
+      <img src="/images/AtlasNXT_medium-logo-light_RGB.svg" alt="Logo" />
+      <button class="flex bg-track24-primary-300 h-8 px-4 rounded items-center gap-2">
+        Remitt Alpha
+        <img src="/images/Vector.svg" alt="Vector" class="w-3 h-1.5" />
+      </button>
+      <div class="flex items-center">Control Centre</div>
+      <div class="flex items-center text-track24-secondary-200 underline underline-offset-8 decoration-2">
+        Trips
+      </div>
+      <div class="flex items-center">Insights</div>
+      <div class="flex items-center">Admin</div>
+    </div>
+    <div class="flex items-center">
+      <img src="/images/User.svg" alt="User" class="h-6 w-6" />
+    </div>
+  </nav>
+</header>
+<main class="flex h-[calc(100vh-56px)] font-Indivisible">
+  <div class="w-full h-full bg-track24-neutral-10 py-6 px-9">
+    <div class="flex justify-between w-full py-4">
+      <div class="text-track24-neutral-800 font-bold text-3xl">
+        Assessment
+      </div>
+      <button phx-click="add" class="flex bg-track24-primary-400 hover:bg-track24-neutral-800 text-track24-secondary-200 h-10 px-4 rounded items-center gap-2">
+        <img src="/images/Add.svg" alt="Add" class="m-1" />
+        <div class="font-semibold text-sm">Add</div>
+      </button>
+    </div>
+    <div class="rounded border border-track24-neutral-40 bg-track24-neutral-30">
+      <div class="flex flex-row items-center h-12 bg-track24-neutral-30 font-semibold text-sm text-track24-neutral-500 w-full">
+        <div class="w-14"></div>
+        <div class="w-1/6 flex justify-between items-center pr-1.5">
+          Name
+          <img src="/images/HeaderFilter.svg" alt="HeaderFilter" />
+        </div>
+        <div class="w-1/6 flex justify-between pr-1.5 pl-4">
+          Start
+          <img src="/images/HeaderSort1.svg" alt="HeaderSort1" />
+        </div>
+        <div class="w-1/6 flex justify-between pr-1.5 pl-4">
+          End
+          <img src="/images/HeaderSort2.svg" alt="HeaderSort2" />
+        </div>
+        <div class="w-1/6 flex justify-between pr-1.5 pl-4">
+          Travelling
+          <img src="/images/HeaderFilter.svg" alt="HeaderFilter" />
+        </div>
+        <div class="w-1/6 flex justify-between pr-1.5 pl-4">
+          Status
+          <img src="/images/HeaderFilter.svg" alt="HeaderFilter" />
+        </div>
+        <div class="w-1/6 flex justify-between pr-1.5 pl-4">
+          Issues
+          <img src="/images/HeaderSort2.svg" alt="HeaderSort2" />
+        </div>
+      </div>
+      <%= for trip = %Trip{} <- @trips do %>
+        <div phx-click="select_trip" phx-value-name={trip.name} class={"#{trip_class(@selected_trip.name == trip.name)}"}>
+          <%= case {trip.end, trip.status} do %>
+            <% {_, :cancelled} -> %>
+              <div class="w-14 flex justify-center">
+                <img src="/images/CrossedCircle.svg" alt="CrossedCircle" />
+              </div>
+            <% {nil, _} -> %>
+              <div class="w-14 flex justify-center">
+                <img src="/images/DashedCircle.svg" alt="DashedCircle" />
+              </div>
+            <% {_, _} -> %>
+              <div class="w-14 flex justify-center">
+                <img src="/images/CheckedCircle.svg" alt="CheckedCircle" />
+              </div>
+          <% end %>
+          <div class="w-1/6 font-semibold py-3 pr-4"><%= trip.name %></div>
+          <%= unless is_nil(trip.start) do %>
+            <div class="w-1/6 px-4 py-3"><%= trip.start.day %> <%= Calendar.strftime(trip.start, "%b") %> <%= Calendar.strftime(trip.start, "%y") %></div>
+          <% else %>
+            <div class="w-1/6 px-4 py-3">n/a</div>
+          <% end %>
+          <%= unless is_nil(trip.end) do %>
+            <div class="w-1/6 px-4 py-3"><%= trip.end.day %> <%= Calendar.strftime(trip.end, "%b") %> <%= Calendar.strftime(trip.end, "%y") %></div>
+          <% else %>
+            <div class="w-1/6 px-4 py-3">n/a</div>
+          <% end %>
+          <%= if length(trip.travelling) == 1 do %>
+            <div class="w-1/6 py-4 px-3"><%= hd(trip.travelling) |> elem(1) %></div>
+          <% else %>
+            <div class="w-1/6 font-semibold underline py-4 px-3"><%= fetch_travelling_size(trip.travelling) %></div>
+          <% end %>
+          <%= case trip.status do %>
+              <% :cancelled -> %>
+                <div class="w-1/6 py-4 px-3">
+                  <div class="w-fit bg-track24-red-100 px-2 py-1 border border-track24-red-200 rounded-2xl text-track24-red-300 font-semibold text-xs">
+                    Cancelled
+                  </div>
+                </div>
+              <% :in_progress -> %>
+                <div class="w-1/6 py-4 px-3">
+                  <div class="w-fit bg-track24-blue-100 px-2 py-1 border border-track24-blue-200 rounded-2xl text-track24-blue-300 font-semibold text-xs">
+                    In Progress
+                  </div>
+                </div>
+              <% :not_started -> %>
+                <div class="w-1/6 py-4 px-3">
+                  <div class="w-fit px-2 py-1 border border-track24-neutral-50 rounded-2xl text-track24-neutral-400 font-semibold text-xs">
+                    Not started
+                  </div>
+                </div>
+              <% :completed -> %>
+                <div class="w-1/6 py-4 px-3">
+                  <div class="w-fit bg-track24-green-100 px-2 py-1 border border-track24-green-200 rounded-2xl text-track24-green-300 font-semibold text-xs">
+                    Completed
+                  </div>
+                </div>
+          <% end %>
+          <%= if trip.issues == [] do %>
+            <div class="w-1/6 py-4 px-3"></div>
+          <% else %>
+            <%= case hd(trip.issues) do %>
+                <% "Nearby" -> %>
+                  <div class="w-1/6 py-4 px-3">
+                    <div class="flex gap-x-1 w-fit bg-track24-yellow-100 px-2 py-1 border border-track24-yellow-200 rounded-2xl text-track24-yellow-300 font-semibold  text-xs">
+                      <img src="/images/Warning.svg" alt="Warning" />
+                      <%= length(trip.issues) %> Nearby
+                    </div>
+                  </div>
+                <% "Overdue" -> %>
+                  <div class="w-1/6 py-4 px-3">
+                    <div class="flex gap-x-1 w-fit bg-track24-yellow-100 px-2 py-1 border border-track24-yellow-200 rounded-2xl text-track24-yellow-300 font-semibold  text-xs">
+                      <img src="/images/Clock.svg" alt="Clock" />
+                      <%= length(trip.issues) %> Overdue
+                    </div>
+                  </div>
+                <% _ -> %>
+                  <div class="w-1/6 py-4 px-3">n/a</div>
+            <% end %>
+          <% end %>
+        </div>
+      <% end %>
+    </div>    
+    <div class="flex flex-row items-center justify-between h-[72px] w-full text-sm text-track24-neutral-900  font-normal">
+      <div class="flex items-center gap-2">
+        <div>
+          Items per page:
+        </div>
+        <div class="relative">
+          <select class="border border-track24-neutral-40 rounded bg-track24-neutral-0 pl-4 pr-10 py-1 w-[70px] appearance-none">
+            <option value="5">5</option>
+            <option value="10">10</option>
+            <option value="15">15</option>
+            <option value="20">20</option>
+          </select>
+          <img 
+            src="/images/DarkArrow.svg" 
+            alt="DarkArrow" 
+            class="absolute right-3 top-1/2 transform -translate-y-1/2 pointer-events-none w-5 h-4"
+          />
+        </div>
+      </div>
+      <div class="flex items-center gap-2">
+        <div>
+          1-5 of 500
+        </div>
+        <div>
+          <button class="hover:bg-track24-neutral-30 p-2 rounded">
+            <img src="/images/ChevronLeft.svg" alt="ChevronLeft" />
+          </button>
+          <button class="hover:bg-track24-neutral-30 p-2 rounded">
+            <img src="/images/ChevronRight.svg" alt="ChevronRight" />
+          </button>
+        </div>
+      </div>
+    </div> 
+  </div>
+  <%= unless is_nil(@selected_trip.name) do %>
+    <div class="w-30vw h-[calc(100vh-56px)] bg-track24-neutral-20 text-track24-neutral-800 flex flex-col">
+      <div class="flex flex-row justify-between w-full border-b border-track24-neutral-50 py-2 px-4">
+        <button phx-click="close_overview" class="rounded hover:bg-track24-neutral-30 p-2">
+          <img src="/images/X.svg" alt="X" />
+        </button>
+        <button class="rounded hover:bg-track24-neutral-30 p-2">
+          <img src="/images/DotsThree.svg" alt="DotsThree" />
+        </button>
+      </div>
+      <div class="overflow-auto flex-grow">
+        <div class="flex flex-col w-full py-2 px-4 gap-2">
+          <div class="font-bold text-xl">
+            <%= @selected_trip.name %>
+          </div>
+          <div class="font-normal text-sm">
+            <%= @selected_trip.description %>
+          </div>
+        </div>
+        <div>
+          <img src="/images/PlaceholderMap.svg" alt="PlaceholderMap" class="w-full h-auto" />
+        </div>
+        <div class="flex flex-col w-full py-2 px-4 gap-2">
+          <div class="font-medium text-lg">
+            Travelling
+          </div>
+          <div class="flex flex-col gap-1 w-full bg-track24-neutral-10 border border-track24-neutral-40 rounded py-2 px-4 text-sm font-normal text-track24-neutral-800">
+            <%= for {type, traveller, _} <- @selected_trip.travelling do %>
+              <div class="flex flex-row gap-2 items-center">
+                <%= case type do %>
+                  <% :user -> %>
+                    <img src="/images/TravellingMobile.svg" alt="TravellingMobile" class="w-4 h-4"/>
+                  <% :group -> %>
+                    <img src="/images/TravellingUserThree.svg" alt="TravellingUserThree" class="w-4 h-4" />
+                  <% :tracker -> %>
+                    <img src="/images/TravellingBroadcast.svg" alt="TravellingBroadcast" class="w-4 h-4" />
+                  <% :vehicle -> %>
+                    <img src="/images/TravellingCar.svg" alt="TravellingCar" class="w-4 h-4" />
+                <% end %>
+                <%= traveller %>
+              </div>
+            <% end %>
+          </div>      
+          <div class="font-medium text-lg">
+            Breakdown
+          </div>
+          <%= for {step, index} <- Enum.with_index(@selected_trip.breakdown) do %>
+            <div class="flex flex-row w-full gap-2">
+              <div class="relative drop-shadow-md">
+                <div class="absolute left-1/2 transform -translate-x-1/2 top-0 bottom-0 border-l-[3px] border-dashed border-track24-neutral-400 z-0 mt-2"></div>
+                <img src="/images/Rectangle.svg" alt="Rectangle" class="w-10 h-9 z-10 relative" />
+                <span class="absolute inset-0 flex justify-center font-bold text-white pt-1 z-20">
+                  <%= <<?A + index>> %>
+                  <!-- Letter index -->
+                </span>
+              </div>
+              <div class="w-full border border-track24-neutral-40 rounded p-2 gap-1">
+                <%= for {type, info} <- step do %>
+                  <%= unless type == :issue do %>
+                    <div class="w-full flex flex-row items-center gap-x-[3px] text-sm font-normal text-track24-neutral-400">
+                      <%= case type do %>
+                        <% :location -> %>
+                          <img src="/images/Pin.svg" alt="Pin" />
+                        <% :datetime -> %>
+                          <img src="/images/Calendar.svg" alt="Calendar" />
+                        <% :vehicle -> %>
+                          <img src="/images/Car.svg" alt="Car" />
+                        <% :arrived -> %>
+                          <img src="/images/Flag.svg" alt="Flag" />
+                      <% end %>
+                      <%= info %>
+                      <%= if type == :arrived do %>
+                        <div class="ml-auto w-fit bg-track24-green-100 px-2 py-1 border border-track24-green-200 rounded-2xl text-track24-green-300 font-semibold  text-xs">
+                          Completed
+                        </div>
+                      <% end %>
+                    </div>
+                  <% else %>
+                    <div class="w-full flex flex-row items-center gap-x-[3px] py-2 px-2 text-track24-yellow-300 bg-track24-yellow-100 border border-track24-yellow-200 rounded text-sm font-normal text-track24-neutral-400">
+                      <img src="/images/ClockCountdown.svg" alt="ClockCountdown" />
+                      <%= info %>
+                      <img src="/images/WarningDots.svg" alt="WarningDots" class="ml-auto w-5 h-5"/>
+                    </div>
+                  <% end %>
+                <% end %>
+              </div>
+            </div>
+          <% end %>    
+        </div>
+      </div>
+      <div class="px-3 py-2">
+        <button class="flex flex-row gap-2 justify-center w-full border-2 border-track24-neutral-400 text-track24-neutral-400 font-semibold text-sm rounded px-3 py-2">
+          <img src="/images/Dashboard.svg" alt="Dashboard" />
+          Open Dashboard
+        </button>
+      </div>
+    </div>
+  <% end %>
+
+  <%= if @use_modal do %>
+  <div id="modal" class="fixed inset-0 bg-gray-400 bg-opacity-40 flex items-center justify-center z-50 font-Indivisible">
+    <div class="modal-backdrop absolute inset-0"></div>
+    <div class="h-[580px] w-[640px] relative bg-track24-neutral-10 rounded shadow-lg z-10 flex flex-col">
+      <div class="flex flex-row items-center justify-between w-full px-6 py-4 border-b border-track24-neutral-50">
+        <div class="font-bold text-xl text-track24-neutral-600">
+          New Trip
+        </div>
+        <button phx-click="canel_add" class="hover:bg-track24-neutral-30 rounded">
+          <img src="/images/ModalCross.svg" alt="ModalCross" />
+        </button>
+      </div>
+      <div class="flex flex-row flex-1 overflow-y-auto border-b border-track24-neutral-50 ">
+        <div class="flex flex-col w-[180px] bg-track24-neutral-20 p-2">
+          <div class="flex flex-row p-2 gap-1.5 font-semibold text-sm text-track24-neutral-800 bg-track24-neutral-0 rounded">
+            <img src="/images/Info.svg" alt="Info" />
+            Overview
+          </div>
+        </div>
+        <div class="flex flex-col w-full p-4 gap-2 font-normal text-track24-neutral-800 text-sm ">
+          <div class="bg-track24-neutral-0 border border-track24-neutral-40 rounded py-2 px-3">
+            Trip to London Zoo and beyond
+          </div>
+          <div class="bg-track24-neutral-0 border border-track24-neutral-40 rounded py-2 px-3 h-20">
+            A big fun day out!
+          </div>
+          <div class="font-semibold text-base">
+            Who is travelling
+          </div>
+          <div class="flex flex-row gap-2 bg-track24-neutral-0 border border-track24-neutral-40 rounded py-2 px-3">
+            <div class="flex flex-col gap-2 w-11/12">
+              <div class="flex flex-row gap-2 font-semibold text-sm  text-track24-neutral-800">
+                <div class="flex flex-row gap-1 rounded-2xl bg-track24-light py-1 pl-1.5 items-center">
+                  <img src="/images/DeviceMobile.svg" alt="DeviceMobile" class="w-4 h-4"/>
+                  <div>Philp Burn</div>
+                  <img src="/images/SmallCrossedCircle.svg" alt="SmallCrossedCircle" />
+                </div>
+                <div class="flex flex-row gap-1 rounded-2xl bg-track24-light py-1 pl-1.5 items-center">
+                  <img src="/images/Broadcast.svg" alt="Broadcast" class="w-4 h-4"/>
+                  <div>Tracker Delta</div>
+                  <img src="/images/SmallCrossedCircle.svg" alt="SmallCrossedCircle" />
+                </div>
+              </div>
+              <div class="flex flex-row gap-2 font-semibold text-sm  text-track24-neutral-800">
+                <div class="flex flex-row gap-1 rounded-2xl bg-track24-light py-1 pl-1.5 items-center">
+                  <img src="/images/UsersThree.svg" alt="UsersThree" class="w-4 h-4"/>
+                  <div>Group Bravo</div>
+                  <img src="/images/SmallCrossedCircle.svg" alt="SmallCrossedCircle" />
+                </div> 
+                <div class="flex flex-row gap-1 rounded-2xl bg-track24-light py-1 pl-1.5 items-center">
+                  <img src="/images/DarkCar.svg" alt="DarkCar" class="w-4 h-4"/>
+                  <div>Vehicle Charlie</div>
+                  <img src="/images/SmallCrossedCircle.svg" alt="SmallCrossedCircle" />
+                </div>                   
+              </div>
+            </div>
+            <div class="w-1/12 flex justify-center ml-auto">
+              <img src="/images/LightArrow.svg" alt="LightArrow" class="w-6 h-6"/>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="flex flex-row px-6 py-4 ml-auto gap-4">
+        <button phx-click="canel_add" class="font-semibold text-sm text-track24-neutral-400 rounded py-2 px-3 hover:bg-track24-neutral-30">Cancel</button>
+        <button phx-click="canel_add" class="font-semibold text-sm rounded py-2 px-3 bg-track24-primary-400 hover:bg-track24-neutral-800 text-track24-secondary-200">Add a journey</button>
+      </div>
+    </div>
+  </div>
+  
+  <% end %>
+</main>
